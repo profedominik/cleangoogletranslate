@@ -1,1 +1,52 @@
-<!doctype html><html><head><base href="%%BASE%%"><title>%%TITLE%% admin</title></head><body>admin</body></html>
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <base href="%%BASE%%">
+  <title>%%TITLE%% · Admin</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/app.css?v=%%VERSION%%">
+  <link rel="stylesheet" href="assets/css/admin.css?v=%%VERSION%%">
+  <script type="module" src="assets/js/admin.js?v=%%VERSION%%"></script>
+</head>
+<body class="admin-body">
+<div class="adm">
+  <aside class="adm-nav" id="adm-nav">
+    <div class="adm-brand">
+      <img src="favicon.svg" alt="" width="26" height="26">
+      <div><div class="adm-brand-name" id="adm-name">CleanTranslate</div><div class="adm-brand-sub">Admin dashboard</div></div>
+    </div>
+    <nav aria-label="Admin sections">
+      <a href="#/overview" data-view="overview" data-icon="globe"><span>Overview</span></a>
+      <a href="#/notes" data-view="notes" data-icon="file"><span>Notes</span></a>
+      <a href="#/engines" data-view="engines" data-icon="zap"><span>Translation engines</span></a>
+      <a href="#/tags" data-view="tags" data-icon="tag"><span>Tags</span></a>
+      <a href="#/cache" data-view="cache" data-icon="history"><span>Translation cache</span></a>
+      <a href="#/logs" data-view="logs" data-icon="text"><span>Logs</span></a>
+      <a href="#/api" data-view="api" data-icon="external"><span>API & embedding</span></a>
+      <a href="#/settings" data-view="settings" data-icon="sliders"><span>Settings</span></a>
+      <a href="#/system" data-view="system" data-icon="keyboard"><span>System & backup</span></a>
+    </nav>
+    <div class="adm-nav-foot">
+      <a class="btn" href="./" data-icon="external"><span>Open the editor</span></a>
+      <div class="adm-noauth" id="adm-noauth" hidden>No password is set. Anyone who can reach this URL can use the admin. See System → Security.</div>
+    </div>
+  </aside>
+  <div class="adm-main">
+    <header class="adm-top">
+      <button class="icon-btn adm-menu" id="adm-menu" data-icon="menu" aria-label="Menu"></button>
+      <h1 id="adm-title">Overview</h1>
+      <span class="adm-top-spacer"></span>
+      <button class="icon-btn" id="adm-theme" data-icon="moon" title="Toggle dark mode"></button>
+      <button class="icon-btn" id="adm-refresh" data-icon="refresh" title="Refresh"></button>
+    </header>
+    <main class="adm-content" id="adm-content" tabindex="-1"></main>
+  </div>
+</div>
+<div class="popover" id="popover" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<input type="file" id="adm-file" hidden accept=".json,application/json">
+</body>
+</html>

@@ -1,1 +1,130 @@
-<!doctype html><html><head><base href="%%BASE%%"><title>%%TITLE%%</title></head><body>editor</body></html>
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <base href="%%BASE%%">
+  <title>%%TITLE%%</title>
+  <meta name="description" content="Line-aligned two-pane translation notes editor">
+  <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#11161c" media="(prefers-color-scheme: dark)">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/css/app.css?v=%%VERSION%%">
+  <script type="module" src="assets/js/main.js?v=%%VERSION%%"></script>
+</head>
+<body>
+<div id="app" class="app" data-loading="1">
+  <header class="topbar" id="topbar">
+    <div class="tb-group tb-left">
+      <button class="icon-btn" id="btn-drawer" data-icon="sidebar" title="Notes (Alt+N)" aria-label="Notes" aria-expanded="false" aria-controls="drawer"></button>
+      <input id="note-title" class="title-input" type="text" placeholder="Untitled note" aria-label="Note title" maxlength="200" autocomplete="off" spellcheck="false">
+      <span class="save-state" id="save-state" role="status" aria-live="polite" title="Saved"></span>
+    </div>
+    <div class="tb-group tb-langs">
+      <label class="lang-select" title="Source language">
+        <span class="sr-only">Source language</span>
+        <select id="sel-source" aria-label="Source language"></select>
+      </label>
+      <button class="icon-btn" id="btn-swap" data-icon="swap" title="Swap languages" aria-label="Swap languages"></button>
+      <label class="lang-select" title="Target language">
+        <span class="sr-only">Target language</span>
+        <select id="sel-target" aria-label="Target language"></select>
+      </label>
+      <label class="engine-select" title="Translation engine">
+        <span class="sr-only">Translation engine</span>
+        <select id="sel-engine" aria-label="Translation engine"></select>
+      </label>
+    </div>
+    <div class="tb-group tb-tools" role="toolbar" aria-label="Editor tools">
+      <button class="tool-btn" id="btn-tags" data-icon="tag" title="Insert tag (Ctrl+K or type / on an empty line)" aria-haspopup="menu"><span class="lbl">Tags</span></button>
+      <span class="tb-sep" aria-hidden="true"></span>
+      <button class="icon-btn toggle" id="tg-numbers" data-icon="hash" title="Line numbers" aria-pressed="true"></button>
+      <button class="icon-btn toggle" id="tg-zebra" data-icon="stripes" title="Alternating shades" aria-pressed="true"></button>
+      <button class="icon-btn toggle" id="tg-highlight" data-icon="sparkle" title="Syntax colors" aria-pressed="true"></button>
+      <button class="icon-btn" id="tg-layout" data-icon="columns" title="Layout: side by side / stacked"></button>
+      <button class="icon-btn toggle" id="tg-translation" data-icon="eye" title="Show / hide translation pane (Alt+T)" aria-pressed="true"></button>
+      <button class="icon-btn" id="btn-font" data-icon="type" title="Text size and font" aria-haspopup="dialog"></button>
+      <button class="icon-btn" id="btn-fullscreen" data-icon="maximize" title="Fullscreen (F11 / Alt+F)"></button>
+      <button class="icon-btn" id="btn-more" data-icon="more" title="More" aria-haspopup="menu"></button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="drawer" id="drawer" aria-label="Notes" hidden>
+      <div class="drawer-head">
+        <button class="btn primary" id="btn-new-note" data-icon="plus"><span>New note</span></button>
+        <button class="icon-btn" id="btn-import" data-icon="upload" title="Import a .txt / .md / .json file"></button>
+        <button class="icon-btn drawer-close" id="btn-drawer-close" data-icon="x" title="Close"></button>
+      </div>
+      <div class="drawer-search">
+        <input id="note-search" type="search" placeholder="Search notes…" aria-label="Search notes" autocomplete="off">
+      </div>
+      <ul class="note-list" id="note-list" role="list"></ul>
+      <div class="drawer-foot">
+        <a class="link" id="lnk-admin" href="admin" target="_blank" rel="noopener" data-icon="external"><span>Admin dashboard</span></a>
+      </div>
+    </aside>
+    <div class="drawer-scrim" id="drawer-scrim" hidden></div>
+
+    <main class="main" id="main">
+      <div class="scroller" id="scroller">
+        <div class="pane-head" id="pane-head">
+          <div class="ph-gutter" aria-hidden="true"></div>
+          <div class="ph ph-src">
+            <span class="ph-lang" id="ph-src-lang">Original</span>
+            <span class="ph-detected" id="ph-detected"></span>
+            <span class="ph-spacer"></span>
+            <button class="mini-btn" id="btn-copy-src" data-icon="copy" title="Copy original"></button>
+          </div>
+          <div class="ph-gutter ph-gutter2" aria-hidden="true"></div>
+          <div class="ph ph-tr">
+            <span class="ph-lang" id="ph-tr-lang">Translation</span>
+            <span class="ph-progress" id="ph-progress"></span>
+            <span class="ph-spacer"></span>
+            <button class="mini-btn" id="btn-retranslate" data-icon="refresh" title="Translate missing lines again"></button>
+            <button class="mini-btn" id="btn-copy-tr" data-icon="copy" title="Copy translation"></button>
+            <button class="mini-btn" id="btn-hide-tr" data-icon="eyeOff" title="Hide translation pane"></button>
+          </div>
+          <div class="split-handle" id="split-handle" role="separator" aria-orientation="vertical" aria-label="Resize panes" tabindex="0" title="Drag to resize · double-click to reset"></div>
+        </div>
+        <div class="rows" id="rows" tabindex="-1" aria-label="Note lines"></div>
+        <textarea class="bulk-editor" id="bulk-editor" hidden spellcheck="true" aria-label="Edit all lines as plain text"></textarea>
+        <div class="tail-pad" id="tail-pad" aria-hidden="true"></div>
+      </div>
+      <div class="selbar" id="selbar" hidden role="toolbar" aria-label="Selected lines">
+        <span class="selbar-count" id="selbar-count"></span>
+        <button class="tool-btn" data-act="copy" data-icon="copy"><span class="lbl">Copy</span></button>
+        <button class="tool-btn" data-act="copy-both" data-icon="columns"><span class="lbl">Copy both</span></button>
+        <button class="tool-btn" data-act="cut" data-icon="scissors"><span class="lbl">Cut</span></button>
+        <button class="tool-btn" data-act="wrap" data-icon="tag"><span class="lbl">Wrap in tag</span></button>
+        <button class="tool-btn" data-act="retranslate" data-icon="refresh"><span class="lbl">Retranslate</span></button>
+        <button class="tool-btn danger" data-act="delete" data-icon="trash"><span class="lbl">Delete</span></button>
+        <button class="icon-btn" data-act="clear" data-icon="x" title="Clear selection (Esc)"></button>
+      </div>
+      <div class="bulkbar" id="bulkbar" hidden>
+        <span>Plain-text mode: edit everything at once. Unchanged lines keep their translations.</span>
+        <button class="btn primary" id="btn-bulk-done" data-icon="check"><span>Done</span></button>
+      </div>
+    </main>
+  </div>
+
+  <footer class="statusbar" id="statusbar">
+    <span id="st-lines"></span>
+    <span id="st-chars"></span>
+    <span id="st-translated"></span>
+    <span class="st-spacer"></span>
+    <span id="st-engine"></span>
+  </footer>
+</div>
+
+<div class="popover" id="popover" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<input type="file" id="file-input" accept=".txt,.md,.markdown,.json,.csv,text/plain,application/json" hidden>
+<noscript><p style="padding:2rem;font:16px system-ui">CleanTranslate needs JavaScript.</p></noscript>
+</body>
+</html>
