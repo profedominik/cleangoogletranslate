@@ -1,0 +1,24 @@
+# CleanTranslate behind Caddy (automatic HTTPS). Pick one of the blocks.
+
+# 1) Own subdomain
+translate.example.com {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8080
+}
+
+# 2) A path on an existing site (start the app with BASE_PATH=/translate)
+example.com {
+	redir /translate /translate/
+	handle /translate/* {
+		reverse_proxy 127.0.0.1:8080
+	}
+	# … the rest of your site …
+}
+
+# 3) Password-protect at the proxy instead of in the app (hash: caddy hash-password)
+# translate.example.com {
+# 	basic_auth {
+# 		teacher $2a$14$REPLACE_WITH_HASH
+# 	}
+# 	reverse_proxy 127.0.0.1:8080
+# }

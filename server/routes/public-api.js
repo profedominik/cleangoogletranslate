@@ -29,6 +29,10 @@ export function registerPublicApi(router, { translator, settings }) {
 
   const run = async (p) => {
     if (p.q == null || p.q === '') throw new HttpError(400, 'Missing "q"');
+    if (p.engine && p.engine !== 'auto') {
+      const row = translator.store.getEngineRow(String(p.engine));
+      if (row?.type === 'google-browser') throw new HttpError(400, 'This engine runs inside the editor\'s browser and cannot be used through the API — use "auto" or a server engine');
+    }
     const single = !Array.isArray(p.q);
     const texts = (single ? [p.q] : p.q).map((t) => String(t ?? ''));
     if (texts.length > 1000) throw new HttpError(413, 'At most 1000 texts per request');

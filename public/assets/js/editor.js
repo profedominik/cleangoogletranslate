@@ -5,7 +5,7 @@
 // long either side wraps, and both scroll together. Each cell is a transparent
 // auto-growing <textarea> stacked on a highlight layer with identical metrics.
 import {
-  analyze, planLine, planKey, highlight, parseLine, serializeLine, buildTagMap, newId, remapLines,
+  analyze, planLine, planKey, highlight, parseLine, serializeLine, buildTagMap, newId, remapLines, mdInfo,
 } from '../../shared/markup.js';
 import { esc } from './ui.js';
 import { icon } from './icons.js';
@@ -201,6 +201,22 @@ export class Editor extends EventTarget {
 
   /** Re-run analysis after text edits (no rows added/removed). */
   refresh(changedIdx = null) {
+    // Fast path for typing: if one line changed but its tags and emptiness did not,
+    // no other line's structure can change, so only that line is re-analysed.
+    if (changedIdx && changedIdx.length === 1) {
+      const i = changedIdx[0];
+      const old = this.info[i];
+      const p = parseLine(this.lines[i].text, this.tagMap);
+      const sameTokens = old && p.tokens.length === old.tokens.length
+        && p.tokens.every((t, k) => t.name === old.tokens[k].name && t.closing === old.tokens[k].closing);
+      if (sameTokens && !p.body.trim() === !old.body.trim()) {
+        this.info[i] = { ...old, body: p.body, prefixLen: p.prefixLen, md: mdInfo(p.body) };
+        this.plans[i] = planLine(this.info[i]);
+        this.paintRow(i);
+        this.updatePlaceholder();
+        return;
+      }
+    }
     const prevSig = this.info.map((x) => `${x.section}|${x.spans}|${x.role}|${x.style}|${x.translate}`);
     this.recompute();
     let structureChanged = prevSig.length !== this.info.length;

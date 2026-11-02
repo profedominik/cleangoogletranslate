@@ -5,7 +5,7 @@ import { renderExport, contentDisposition } from '../export.js';
 
 const NOTE_BODY_LIMIT = 8 * 1024 * 1024;
 
-export function registerNoteRoutes(router, { notes, settings, settingsSvc, translator, config }) {
+export function registerNoteRoutes(router, { notes, settings, settingsSvc, translator, config, limiter }) {
   router.get('/api/config', () => {
     const s = settings();
     return {
@@ -95,7 +95,9 @@ export function registerNoteRoutes(router, { notes, settings, settingsSvc, trans
   });
 
   // Translation for the editor (same-origin; the public middleman API lives under /api/v1).
-  router.post('/api/translate', async ({ req }) => {
+  router.post('/api/translate', async ({ req, ip }) => {
+    const lim = limiter.take(`editor:${ip}`, Number(process.env.EDITOR_RATE_LIMIT) || 600);
+    if (!lim.ok) throw new HttpError(429, 'Too many translation requests, slow down');
     const body = await readJson(req, 512 * 1024);
     const texts = Array.isArray(body.texts) ? body.texts : Array.isArray(body.items) ? body.items.map((i) => i?.text ?? '') : null;
     if (!texts) throw new HttpError(400, 'Send { texts: [...] }');

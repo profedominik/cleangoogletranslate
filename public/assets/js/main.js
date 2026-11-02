@@ -39,7 +39,8 @@ async function boot() {
   try {
     S.config = await api.get('api/config');
   } catch (e) {
-    document.body.innerHTML = `<div style="padding:32px;font:15px system-ui;max-width:560px;margin:auto"><h2>Cannot reach the CleanTranslate server</h2><p>${esc(e.message)}</p><p><button onclick="location.reload()">Retry</button></p></div>`;
+    document.body.innerHTML = `<div style="padding:32px;font:15px system-ui;max-width:560px;margin:auto"><h2>Cannot reach the CleanTranslate server</h2><p>${esc(e.message)}</p><p><button id="boot-retry" class="btn">Retry</button></p></div>`;
+    document.getElementById('boot-retry').addEventListener('click', () => location.reload());
     return;
   }
   document.title = S.config.instanceName;
@@ -61,8 +62,12 @@ async function boot() {
   wireKeyboard();
   wireViewport();
   await refreshNoteList();
-  const wanted = noteIdFromUrl() || params.get('note') || prefs.get('lastNote');
-  await openNote(wanted, { fallback: true });
+  if (params.get('new') === '1') {
+    await createNote();
+  } else {
+    const wanted = noteIdFromUrl() || params.get('note') || prefs.get('lastNote');
+    await openNote(wanted, { fallback: true });
+  }
   app.dataset.loading = '0';
   setInterval(refreshEnginesQuietly, 60_000);
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
@@ -111,6 +116,7 @@ function noteIdFromUrl() {
 function setUrl(id) {
   const qs = new URLSearchParams(location.search);
   qs.delete('note');
+  qs.delete('new');
   const q = qs.toString();
   const url = `${basePath()}n/${id}${q ? `?${q}` : ''}`;
   if (location.pathname + location.search !== url) history.replaceState(null, '', url);
@@ -293,7 +299,10 @@ async function refreshEnginesQuietly() {
   try {
     const c = await api.get('api/config');
     S.config.engines = c.engines;
-    S.config.tags = c.tags;
+    if (JSON.stringify(c.tags) !== JSON.stringify(S.config.tags)) {
+      S.config.tags = c.tags;
+      editor.setTags(c.tags);
+    }
     fillEngineSelect();
     updateStatus();
   } catch { /* offline */ }
@@ -413,7 +422,7 @@ function applyPrefs() {
   paneHead.classList.toggle('no-numbers', !p.lineNumbers);
   rowsEl.classList.toggle('zebra', p.zebra);
   rowsEl.classList.toggle('plain', !p.highlight);
-  editor?.setPlain(!p.highlight);
+  if (editor && editor.plain !== !p.highlight) editor.setPlain(!p.highlight);
   const showTr = p.showTranslation;
   rowsEl.classList.toggle('no-tr', !showTr);
   paneHead.classList.toggle('no-tr', !showTr);

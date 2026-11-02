@@ -169,7 +169,7 @@ async function viewNotes() {
         <div class="row-actions">
           <input class="inp" id="notes-q" type="search" placeholder="Search title and text…" value="${h(q)}" style="width:240px">
           <div class="seg"><button type="button" data-trash="0" aria-pressed="${!notesTrash}">Active</button><button type="button" data-trash="1" aria-pressed="${notesTrash}">Trash</button></div>
-          ${notesTrash ? '<button class="btn danger" id="empty-trash" data-icon="trash"><span>Empty trash</span></button>' : '<a class="btn primary" href="./" target="_blank" data-icon="plus"><span>New note</span></a>'}
+          ${notesTrash ? '<button class="btn danger" id="empty-trash" data-icon="trash"><span>Empty trash</span></button>' : '<a class="btn primary" href="./?new=1" target="_blank" data-icon="plus"><span>New note</span></a>'}
         </div>
       </div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Title</th><th>Languages</th><th class="num">Lines</th><th class="num">Translated</th><th class="num">${notesTrash ? 'Deleted' : 'Updated'}</th><th></th></tr></thead><tbody>
@@ -782,7 +782,8 @@ async function render() {
   try {
     await VIEWS[view]();
   } catch (e) {
-    setView(`<section class="card"><h2>Could not load this page</h2><p class="sub">${h(e.message)}</p><button class="btn" onclick="location.reload()">Reload</button></section>`);
+    setView(`<section class="card"><h2>Could not load this page</h2><p class="sub">${h(e.message)}</p><button class="btn" id="view-reload">Reload</button></section>`);
+    $('#view-reload').addEventListener('click', () => location.reload());
   }
 }
 

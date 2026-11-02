@@ -1,0 +1,26 @@
+# Manual systemd unit (install.sh writes this for you).
+# cp deploy/cleantranslate.service /etc/systemd/system/ && systemctl daemon-reload && systemctl enable --now cleantranslate
+[Unit]
+Description=CleanTranslate — line-aligned translation notes
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=cleantranslate
+Group=cleantranslate
+EnvironmentFile=-/etc/cleantranslate.env
+Environment=NODE_ENV=production
+Environment=DATA_DIR=/var/lib/cleantranslate
+WorkingDirectory=/opt/cleantranslate
+ExecStart=/usr/bin/node /opt/cleantranslate/server/index.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/cleantranslate
+
+[Install]
+WantedBy=multi-user.target

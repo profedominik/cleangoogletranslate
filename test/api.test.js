@@ -285,3 +285,24 @@ test('admin can be protected separately or disabled', async () => {
     await b.close();
   }
 });
+
+test('public API refuses the browser-only engine with a clear message', async () => {
+  const r = await t.post('/api/v1/translate', { q: 'hello', target: 'es', engine: 'google-browser' });
+  assert.equal(r.status, 400);
+  assert.match(r.json.error, /browser/);
+});
+
+test('editor translate endpoint is rate limited per IP', async () => {
+  const prev = process.env.EDITOR_RATE_LIMIT;
+  process.env.EDITOR_RATE_LIMIT = '3';
+  const a = await startApp();
+  try {
+    const codes = [];
+    for (let i = 0; i < 5; i++) codes.push((await a.post('/api/translate', { texts: [`x${i}`], target: 'es' })).status);
+    assert.deepEqual(codes, [200, 200, 200, 429, 429]);
+  } finally {
+    if (prev === undefined) delete process.env.EDITOR_RATE_LIMIT;
+    else process.env.EDITOR_RATE_LIMIT = prev;
+    await a.close();
+  }
+});
