@@ -1,0 +1,18 @@
+{
+  "name": "cleantranslate",
+  "version": "1.0.0",
+  "description": "Maximized, line-aligned two-pane translation notes editor with autosave, tag pills, a self-hosted translation middleman API and an admin dashboard. Zero npm dependencies.",
+  "type": "module",
+  "main": "server/index.js",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test --test-concurrency=1 \"test/*.test.js\"",
+    "test:e2e": "node test/e2e/run.js"
+  }
+}
